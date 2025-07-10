@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Stopwatch</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+      text-shadow: 1px 1px 1px #fff;
+    }
+
+    .stopwatch {
+      background: white;
+      padding: 30px 25px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .time {
+      font-size: 50px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .buttons button {
+      padding: 10px 20px;
+      margin: 6px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .start { background: #4CAF50; }
+    .pause { background: #FF9800; }
+    .reset { background: #F44336; }
+    .lap   { background: #2196F3; }
+
+    .buttons button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    @media (max-width: 450px) {
+      .time {
+        font-size: 38px;
+      }
+
+      .buttons button {
+        width: 100%;
+        margin: 8px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Advanced Stopwatch</h1>
+  <div class="stopwatch">
+    <div class="time" id="display">00:00:00</div>
+    <div class="buttons">
+      <button class="start" onclick="start()">Start</button>
+      <button class="pause" onclick="pause()">Pause</button>
+      <button class="reset" onclick="reset()">Reset</button>
+      <button class="lap" onclick="lap()">Lap</button>
+    </div>
+    <table id="lapTable">
+      <thead>
+        <tr>
+          <th>Lap</th>
+          <th>Total Time</th>
+          <th>Split</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    let startTime = 0;
+    let elapsedTime = 0;
+    let interval;
+    let isRunning = false;
+    let lastLapTime = 0;
+    let lapCount = 0;
+
+    const display = document.getElementById('display');
+    const lapTableBody = document.querySelector('#lapTable tbody');
+
+    function formatTime(ms) {
+      let totalSeconds = Math.floor(ms / 1000);
+      let minutes = Math.floor(totalSeconds / 60);
+      let seconds = totalSeconds % 60;
+      let milliseconds = Math.floor((ms % 1000) / 10);
+
+      return (
+        String(minutes).padStart(2, '0') + ':' +
+        String(seconds).padStart(2, '0') + ':' +
+        String(milliseconds).padStart(2, '0')
+      );
+    }
+
+    function updateTime() {
+      const now = Date.now();
+      elapsedTime = now - startTime;
+      display.textContent = formatTime(elapsedTime);
+    }
+
+    function start() {
+      if (!isRunning) {
+        startTime = Date.now() - elapsedTime;
+        interval = setInterval(updateTime, 50);
+        isRunning = true;
+      }
+    }
+
+    function pause() {
+      if (isRunning) {
+        clearInterval(interval);
+        isRunning = false;
+      }
+    }
+
+    function reset() {
+      clearInterval(interval);
+      isRunning = false;
+      elapsedTime = 0;
+      lastLapTime = 0;
+      lapCount = 0;
+      display.textContent = "00:00:00";
+      lapTableBody.innerHTML = "";
+    }
+
+    function lap() {
+      if (!isRunning) return;
+
+      lapCount++;
+      const currentTime = elapsedTime;
+      const totalTime = formatTime(currentTime);
+      const splitTime = formatTime(currentTime - lastLapTime);
+      lastLapTime = currentTime;
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>Lap ${lapCount}</td>
+        <td>${totalTime}</td>
+        <td>${splitTime}</td>
+      `;
+      lapTableBody.prepend(row);
+    }
+  </script>
+
+</body>
+</html>
